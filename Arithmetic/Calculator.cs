@@ -18,6 +18,8 @@ namespace Arithmetic
 
         public double Sum(string expr)
         {
+            Sum(expr.AsSpan());
+
             var numberStack = new Stack<double>();
             var signStack = new Stack<char>();
             var index = 0;
@@ -45,6 +47,81 @@ namespace Arithmetic
             SumStack(numberStack, signStack);
 
             return numberStack.Pop();
+        }
+
+        private void Sum(ReadOnlySpan<char> span)
+        {
+            var index =0;
+          var a=  MatchDouble(span, ref index);
+            var b= MatchSign(span, ref index);
+            var c = MatchDouble(span, ref index);
+        }
+
+        /// <summary>
+        /// 返回WhiteSpace长度
+        /// </summary>
+        /// <param name="span"></param>
+        /// <returns></returns>
+        private int WhiteSpace(ReadOnlySpan<char> span)
+        {
+            var length = 0;
+            for (int i = 0; i < span.Length; i++)
+            {
+                if (Char.IsWhiteSpace(span[i]))
+                    length++;
+                else
+                    break;
+            }
+            return length;
+        }
+
+        private char[] Signs = new[] {'+','-','*','/'};
+        private Result<char> MatchSign(ReadOnlySpan<char> span, ref int index)
+        {
+            var result = new Result<char>{ Position = index };
+            var start = WhiteSpace(span.Slice(index));
+            var i =index +start;
+
+            if (Signs.Contains(span[i]))
+            {
+                result.IsSuccessfu = true;
+                i++;
+                result.Position = i + WhiteSpace(span.Slice(i));
+                result.Value = span[i];
+                index = result.Position;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 匹配数字
+        /// </summary>
+        /// <param name="span"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        private Result<double> MatchDouble(ReadOnlySpan<char> span, ref int index)
+        {
+            var result = new Result<double> { Position = index };
+            var start = WhiteSpace(span.Slice(index));
+            var end =index+ start;
+            var existDot = false;
+            for (; end < span.Length; end++)
+            {
+                if (char.IsNumber(span[end]))
+                    continue;
+                else if (span[end] == '.' && !existDot)
+                    existDot = true;
+                else
+                    break;
+            }
+            if (end-index > start)
+            {
+                result.IsSuccessfu = true;
+                result.Position = end  + WhiteSpace(span.Slice(end));
+                result.Value = Double.Parse(span.Slice(index+start, end -index- start));
+                index = result.Position;
+            }
+            return result;
         }
 
         /// <summary>
