@@ -8,9 +8,9 @@ namespace Arithmetic.Test
         [TestMethod]
         public void TestMethod1()
         {
-          var cacl =  new Calculator();
-          var result=  cacl.Sum(" 123.22 +2*(3+(341-2))-6/2 ");
-            Assert.IsTrue(result== 123.22 + 2 * (3 + (341 - 2)) - 6 / 2);
+            var cacl = new Calculator();
+            var result = cacl.Sum(" 123.22 +(1+(2-1)*1-(3+(341-5-12-2)  ))-6/2 ");
+            Assert.IsTrue(result == 123.22 + (1+(2 - 1) * 1-(3 + (341 - 5 - 12 - 2))) - 6 / 2);
         }
     }
 }

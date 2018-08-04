@@ -40,21 +40,22 @@ namespace Arithmetic
                 else
                 {
                     var bracketStack = new Stack<int>();
+                    var start = 0;
+                    var end = 0;
                     do
                     {
                         var bracket = BracketsParser.TryParse(expr.Substring(index));
                         if (bracket.WasSuccessful)
                         {
+                            index += bracket.Remainder.Position;
                             if (bracket.Value == '(')
                             {
-                                index += bracket.Remainder.Position;
                                 bracketStack.Push(index);
                             }
                             else if (bracket.Value == ')')
                             {
-                                var postion = bracketStack.Pop();
-                                number = Sum(expr.Substring(postion, index - postion));
-                                index += bracket.Remainder.Position;
+                                start = bracketStack.Pop();
+                                end = index - start - bracket.Remainder.Position;
                             }
                         }
                         else
@@ -62,10 +63,19 @@ namespace Arithmetic
                             index += 1;
                         }
                     } while (bracketStack.Count > 0);
+
+                    var sub = expr.Substring(start, end);
+                    number = Sum(sub);
                 }
 
                 if (sign.Value == '+' || sign.Value == '-')
                 {
+                    if (numberStack.Count > 1)
+                    {
+                        var firstSum = SumStack(numberStack, signStack);
+                        numberStack.Push(firstSum);
+                    }
+
                     signStack.Push(sign.Value);
                     numberStack.Push(number);
                 }
@@ -84,19 +94,19 @@ namespace Arithmetic
                 }
             }
 
+
+            return SumStack(numberStack, signStack);
+        }
+
+        private double SumStack(Stack<double> numberStack, Stack<char> signStack)
+        {
+
             while (numberStack.Count > 1)
             {
                 var right = numberStack.Pop();
                 var sign = signStack.Pop();
                 var left = numberStack.Pop();
-                if (sign == '+')
-                {
-                    numberStack.Push(right + left);
-                }
-                else if (sign == '-')
-                {
-                    numberStack.Push(left - right);
-                }
+                numberStack.Push(sign == '+' ? right + left : left - right);
             }
 
             return numberStack.Pop();
