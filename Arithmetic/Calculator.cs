@@ -68,7 +68,7 @@ namespace Arithmetic
         /// <returns></returns>
         private double GetNextValue(string expr, ref int index)
         {
-            var first = NumberParse.TryParse(expr);
+            var first = NumberParse.TryParse(expr.Substring(index));
             if (first.WasSuccessful)
             {
                 index += first.Remainder.Position;
@@ -126,6 +126,9 @@ namespace Arithmetic
         /// <returns></returns>
         private void SumStack(Stack<double> numberStack, Stack<char> signStack)
         {
+            if(numberStack.Count==1)
+                return;
+            
             if (numberStack.Count ==2)
             {
                 var right = numberStack.Pop();
