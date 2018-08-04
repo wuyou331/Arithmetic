@@ -14,11 +14,10 @@ namespace Arithmetic
         private static readonly Parser<char> SignParse =
             (from s in Parse.Chars('+', '-', '*', '/').Once() select s.First()).Token();
 
-        private static readonly Parser<char> openParser = Parse.Char('(').Token();
-        private static readonly Parser<char> closeParser = Parse.Char(')').Token();
+        private static readonly Parser<char> BracketsParser = Parse.Char('(').Token().Or(Parse.Char(')').Token());
+
         public double Sum(string expr)
         {
-
             var numberStack = new Stack<double>();
             var signStack = new Stack<char>();
             var index = 0;
@@ -40,7 +39,29 @@ namespace Arithmetic
                 }
                 else
                 {
-                
+                    var bracketStack = new Stack<int>();
+                    do
+                    {
+                        var bracket = BracketsParser.TryParse(expr.Substring(index));
+                        if (bracket.WasSuccessful)
+                        {
+                            if (bracket.Value == '(')
+                            {
+                                index += bracket.Remainder.Position;
+                                bracketStack.Push(index);
+                            }
+                            else if (bracket.Value == ')')
+                            {
+                                var postion = bracketStack.Pop();
+                                number = Sum(expr.Substring(postion, index - postion));
+                                index += bracket.Remainder.Position;
+                            }
+                        }
+                        else
+                        {
+                            index += 1;
+                        }
+                    } while (bracketStack.Count > 0);
                 }
 
                 if (sign.Value == '+' || sign.Value == '-')
