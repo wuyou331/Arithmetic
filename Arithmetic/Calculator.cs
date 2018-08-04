@@ -12,7 +12,7 @@ namespace Arithmetic
             (from num in Parse.Decimal.Once() select num.First()).Token();
 
         private static readonly Parser<char> SignParse =
-            (from s in Parse.Chars('+', '-', '*', '/').Once() select s.First()).Token();
+            (from sign in Parse.Chars('+', '-', '*', '/').Once() select sign.First()).Token();
 
         private static readonly Parser<char> BracketsParser = Parse.Char('(').Token().Or(Parse.Char(')').Token());
 
@@ -126,14 +126,12 @@ namespace Arithmetic
         /// <returns></returns>
         private void SumStack(Stack<double> numberStack, Stack<char> signStack)
         {
-            if (numberStack.Count <= 1)
-                return;
-            while (numberStack.Count > 1)
+            if (numberStack.Count ==2)
             {
                 var right = numberStack.Pop();
                 var sign = signStack.Pop();
                 var left = numberStack.Pop();
-                numberStack.Push(sign == '+' ? right + left : left - right);
+                numberStack.Push(sign == '+' ? left + right : left - right);
             }
         }
     }
