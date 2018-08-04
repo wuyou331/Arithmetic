@@ -25,39 +25,39 @@ namespace Arithmetic
             numberStack.Push(GetNextValue(expr, ref index));
             while (index < expr.Length)
             {
-                var sign = SignParse.TryParse(expr.Substring(index));
-                index += sign.Remainder.Position;
+                var sign = GetNextSign(expr, ref index);
+                var secondNumber = GetNextValue(expr, ref index);
 
-                var number = GetNextValue(expr,ref index);
-
-                if (sign.Value == '+' || sign.Value == '-')
+                if (sign == '+' || sign == '-')
                 {
                     //当符号为+ -时，优先计算出栈中的内容，并将结果入栈
-                    if (numberStack.Count > 1)
-                    {
-                        SumStack(numberStack, signStack);
-                    }
-
-                    signStack.Push(sign.Value);
-                    numberStack.Push(number);
+                    SumStack(numberStack, signStack);
+                    //剩余的运算符和数字入栈
+                    signStack.Push(sign);
+                    numberStack.Push(secondNumber);
                 }
-                else if (sign.Value == '*' || sign.Value == '/')
+                else if (sign == '*' || sign == '/')
                 {
-                    var result = 0d;
-                    if (sign.Value == '*')
-                    {
-                        result = numberStack.Pop() * number;
-                    }
-                    else if (sign.Value == '/')
-                    {
-                        result = numberStack.Pop() / number;
-                    }
+                    var result = sign == '*' ? numberStack.Pop() * secondNumber : numberStack.Pop() / secondNumber;
                     numberStack.Push(result);
                 }
             }
             SumStack(numberStack, signStack);
 
             return numberStack.Pop();
+        }
+
+        /// <summary>
+        /// 获取下一个运算符
+        /// </summary>
+        /// <param name="expr"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        private char GetNextSign(string expr, ref int index)
+        {
+            var sign = SignParse.TryParse(expr.Substring(index));
+            index += sign.Remainder.Position;
+            return sign.Value;
         }
 
         /// <summary>
@@ -126,6 +126,8 @@ namespace Arithmetic
         /// <returns></returns>
         private void SumStack(Stack<double> numberStack, Stack<char> signStack)
         {
+            if (numberStack.Count <= 1)
+                return;
             while (numberStack.Count > 1)
             {
                 var right = numberStack.Pop();
@@ -133,7 +135,6 @@ namespace Arithmetic
                 var left = numberStack.Pop();
                 numberStack.Push(sign == '+' ? right + left : left - right);
             }
-
         }
     }
 }
