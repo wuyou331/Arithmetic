@@ -4,10 +4,12 @@ using System.Text;
 
 namespace Arithmetic
 {
-    internal class Result<T>
+    internal ref struct Result
     {
-        public bool IsSuccessfu { get; set; } = false;
+        public bool IsSuccessfu { get; set; } 
         public int Position { get; set; }
-        public T Value { get; set; }
+        public ReadOnlySpan<char> Value { get; set; }
+
+     
     }
 }
