@@ -17,11 +17,11 @@ namespace Arithmetic
             var signStack = new Stack<char>();
             var index = 0;
 
-            numberStack.Push(GetNextValue(span, ref index));
+            numberStack.Push(GetNextDouble(span, ref index));
             while (index < span.Length)
             {
                 var sign = GetNextSign(span, ref index);
-                var secondNumber = GetNextValue(span, ref index);
+                var secondNumber = GetNextDouble(span, ref index);
 
                 if (sign == '+' || sign == '-')
                 {
@@ -90,7 +90,7 @@ namespace Arithmetic
         /// <param name="span"></param>
         /// <param name="index"></param>
         /// <returns></returns>
-        private Result<double> MatchNextDouble(ReadOnlySpan<char> span)
+        private Result<double> MatchDouble(ReadOnlySpan<char> span)
         {
             var result = new Result<double> { };
             var start = SkipWhiteSpace(span);
@@ -150,9 +150,9 @@ namespace Arithmetic
         /// <param name="expr"></param>
         /// <param name="index"></param>
         /// <returns></returns>
-        private double GetNextValue(ReadOnlySpan<char> span, ref int index)
+        private double GetNextDouble(ReadOnlySpan<char> span, ref int index)
         {
-            var first = MatchNextDouble(span.Slice(index));
+            var first = MatchDouble(span.Slice(index));
             if (first.IsSuccessfu)
             {
                 index += first.Position;
