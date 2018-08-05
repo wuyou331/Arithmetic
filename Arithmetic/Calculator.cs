@@ -45,7 +45,7 @@ namespace Arithmetic
         #region 文本分析
 
         /// <summary>
-        /// 返回WhiteSpace长度
+        /// 返回空白长度
         /// </summary>
         /// <param name="span"></param>
         /// <returns></returns>
@@ -114,20 +114,9 @@ namespace Arithmetic
             return result;
         }
 
-        private readonly char[] Brackets = new[] { '(', ')' };
-        /// <summary>
-        /// 匹配一个括号
-        /// </summary>
-        /// <param name="span"></param>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        private Result<char> MatchBrackets(ReadOnlySpan<char> span)
-        {
-            return MatchChars(span, Brackets);
-        }
         #endregion
 
-        
+        #region  解析步骤
 
         private readonly char[] Signs = new[] {'+', '-', '*', '/'};
 
@@ -165,6 +154,8 @@ namespace Arithmetic
             }
         }
 
+        private readonly char[] Brackets = new[] {'(', ')'};
+
         /// <summary>
         /// 截取子表达式
         /// </summary>
@@ -180,7 +171,7 @@ namespace Arithmetic
             var end = 0;
             do
             {
-                var bracket = MatchBrackets(span.Slice(index));
+                var bracket = MatchChars(span.Slice(index), Brackets);
                 if (bracket.IsSuccessfu)
                 {
                     index += bracket.Position;
@@ -201,6 +192,9 @@ namespace Arithmetic
             } while (bracketStack.Count > 0);
             return span.Slice(start, end);
         }
+
+        #endregion
+
 
         /// <summary>
         /// 计算栈中的内容
