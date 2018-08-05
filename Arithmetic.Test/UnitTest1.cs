@@ -10,7 +10,7 @@ namespace Arithmetic.Test
         public void TestMethod1()
         {
             var cacl = new Calculator();
-            var expr = "a ( 123.22  +1+   2*   4   )   +((2-1)*1-(3+(341-5-12-2)  ))-6/2 ";
+            var expr = " ( 123.22  +1+   2*   4   )   +((2-1)*1-(3+(341-5-12-2)  ))-6/2 ";
             var result = cacl.Sum(expr);
             Assert.IsTrue(result == (123.22 + 1 + 2 * 4) + ((2 - 1) * 1 - (3 + (341 - 5 - 12 - 2))) - 6 / 2);
 
