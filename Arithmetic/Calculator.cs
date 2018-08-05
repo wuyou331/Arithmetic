@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
-using Sprache;
 
 namespace Arithmetic
 {
     public class Calculator
     {
-
         public double Sum(string expr)
         {
-          return  Sum(expr.AsSpan());
+            return Sum(expr.AsSpan());
         }
 
         private double Sum(ReadOnlySpan<char> span)
@@ -45,12 +42,14 @@ namespace Arithmetic
             return numberStack.Pop();
         }
 
+        #region 文本分析
+
         /// <summary>
         /// 返回WhiteSpace长度
         /// </summary>
         /// <param name="span"></param>
         /// <returns></returns>
-        private int WhiteSpace(ReadOnlySpan<char> span)
+        private int SkipWhiteSpace(ReadOnlySpan<char> span)
         {
             var length = 0;
             for (int i = 0; i < span.Length; i++)
@@ -63,8 +62,6 @@ namespace Arithmetic
             return length;
         }
 
-
-
         /// <summary>
         /// 匹配一个字符
         /// </summary>
@@ -74,22 +71,18 @@ namespace Arithmetic
         /// <returns></returns>
         private Result<char> MatchChars(ReadOnlySpan<char> span, char[] chars)
         {
-            var result = new Result<char> ();
-            var start = WhiteSpace(span);
-            var i =  start;
+            var result = new Result<char>();
+            var start = SkipWhiteSpace(span);
+            var i = start;
 
             if (chars.Contains(span[i]))
             {
                 result.IsSuccessfu = true;
-                result.Position = i+1 + WhiteSpace(span.Slice(i));
+                result.Position = i + 1 + SkipWhiteSpace(span.Slice(i));
                 result.Value = span[i];
             }
             return result;
         }
-
-
-      
-
 
         /// <summary>
         /// 匹配数字
@@ -100,7 +93,7 @@ namespace Arithmetic
         private Result<double> MatchNextDouble(ReadOnlySpan<char> span)
         {
             var result = new Result<double> { };
-            var start = WhiteSpace(span);
+            var start = SkipWhiteSpace(span);
             var end = start;
             var existDot = false;
             for (; end < span.Length; end++)
@@ -115,13 +108,29 @@ namespace Arithmetic
             if (end > start)
             {
                 result.IsSuccessfu = true;
-                result.Position = end  + WhiteSpace(span.Slice(end));
+                result.Position = end + SkipWhiteSpace(span.Slice(end));
                 result.Value = Double.Parse(span.Slice(start, end - start));
             }
             return result;
         }
 
-        private readonly char[] Signs = new[] { '+', '-', '*', '/' };
+        private readonly char[] Brackets = new[] { '(', ')' };
+        /// <summary>
+        /// 匹配一个括号
+        /// </summary>
+        /// <param name="span"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        private Result<char> MatchBrackets(ReadOnlySpan<char> span)
+        {
+            return MatchChars(span, Brackets);
+        }
+        #endregion
+
+        
+
+        private readonly char[] Signs = new[] {'+', '-', '*', '/'};
+
         /// <summary>
         /// 获取下一个运算符
         /// </summary>
@@ -130,11 +139,10 @@ namespace Arithmetic
         /// <returns></returns>
         private char GetNextSign(ReadOnlySpan<char> span, ref int index)
         {
-            var sign = MatchChars(span.Slice(index),Signs);
+            var sign = MatchChars(span.Slice(index), Signs);
             index += sign.Position;
             return sign.Value;
         }
-        
 
         /// <summary>
         /// 获取下一个值，如果是表达式，计算出结果返回
@@ -157,24 +165,13 @@ namespace Arithmetic
             }
         }
 
-        private readonly char[] Brackets = new[] { '(', ')' };
-        /// <summary>
-        /// 匹配一个括号
-        /// </summary>
-        /// <param name="span"></param>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        private Result<char> MatchBrackets(ReadOnlySpan<char> span)
-        {
-            return MatchChars(span, Brackets);
-        }
         /// <summary>
         /// 截取子表达式
         /// </summary>
         /// <param name="expr"></param>
         /// <param name="index"></param>
         /// <returns></returns>
-        private ReadOnlySpan<char>  SubExprString(ReadOnlySpan<char> span, ref int index)
+        private ReadOnlySpan<char> SubExprString(ReadOnlySpan<char> span, ref int index)
         {
             //递归计算出括号中的运算符
             var bracketStack = new Stack<int>();
@@ -213,10 +210,10 @@ namespace Arithmetic
         /// <returns></returns>
         private void SumStack(Stack<double> numberStack, Stack<char> signStack)
         {
-            if(numberStack.Count==1)
+            if (numberStack.Count == 1)
                 return;
-            
-            if (numberStack.Count ==2)
+
+            if (numberStack.Count == 2)
             {
                 var right = numberStack.Pop();
                 var sign = signStack.Pop();
